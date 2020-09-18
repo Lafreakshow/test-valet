@@ -1,0 +1,20 @@
+<idea-plugin>
+    <id>lafreakshow.test-valet</id>
+    <name>Test Valet</name>
+    <vendor>Lafreakshow Projects</vendor>
+    <version>0.1.0</version>
+
+    <description><![CDATA[
+    improves ease of navigation between Test Files and Source File.
+
+    This is a sort of continuation/extension/rework of the Test Navigator Plugin
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+    <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
+
+    <applicationListeners>
+        <listener class="lafreakshow.plugins.valet.DynamicReloadListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
+    </applicationListeners>
+</idea-plugin>
