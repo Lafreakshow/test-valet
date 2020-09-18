@@ -118,3 +118,11 @@ hs_err_pid*
 ## Custom Stuff
 # Build is handled through gradle, so we can just ignore the entire directory.
 .idea
+
+# Excluding things from testproject gradle wrappers. letting IntelliJ create them can be considered part of the test
+# process.
+testproject/**/gradle
+testproject/**/gradlew*
+
+# Needed for buil
+!/gradle/wrapper/gradle-wrapper.jar
