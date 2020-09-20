@@ -17,7 +17,7 @@ val versionJUnit by rootProject.extra("5.7.0")
 val versionStrikt by rootProject.extra("0.27.0")
 
 plugins {
-    //Required for buildings
+    // Required for buildings
     kotlin("jvm").version("1.4.10")
     id("org.jetbrains.intellij").version("0.4.22")
 
@@ -70,10 +70,14 @@ intellij {
     // but support for earlier versions may be added if there is demand.
     version = "2020.2"
 
-    setPlugins("Kotlin", "java")
+    setPlugins("java")
     updateSinceUntilBuild = false
+}
 
-    isDownloadSources = true
+tasks.jar {
+    // Reckon appends a commit has or timestamp to every version between two releases. If this would end up in the jars
+    // filename IntelliJ would not be able to detect changes for the purpose of hot reloading the plugin.
+    archiveVersion.set(hashlessVersionProvider)
 }
 
 // Configuration affecting details of the build process
@@ -99,6 +103,13 @@ idea {
     module {
         isDownloadJavadoc = true
         isDownloadSources = true
+        resourceDirs = mutableSetOf(
+            file("src/main/resources"),
+            // Workaround for a bug in IntelliJ where it would include lots of empty packages
+            // from dependencies in the package view if any resource directory containing a
+            // META-INF folder was added.
+            file("src/main/resources/META-INF/")
+        )
     }
 }
 
@@ -121,13 +132,12 @@ detekt {
     buildUponDefaultConfig = true
 }
 
-
 // reckon needs to have some info passed via properties to create tags.
 reckon {
     scopeFromProp()
     // "dev"   : builds produced during active Development and iteration
     // "rc"    : builds that are assumed to be release ready but are still being polished and tested
-    /// "final : builds that are ready to be released to the public.
+    // "final : builds that are ready to be released to the public.
     // There is no beta tag here, any version below 1.0.0 is considered beta.
     stageFromProp("dev", "rc", "final")
 }
@@ -139,7 +149,7 @@ tasks.reckonTagCreate {
 }
 
 tasks.test {
-    useJUnitPlatform ()
+    useJUnitPlatform()
 }
 
 // When running under Java9+, the debugger needs some permissions to be able and attach to the development instance
