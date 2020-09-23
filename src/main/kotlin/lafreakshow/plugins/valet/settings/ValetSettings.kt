@@ -30,10 +30,9 @@ class ValetSettings : PersistentStateComponent<ValetSettingsState> {
 
     companion object {
         fun getInstance() = ServiceManager.getService(ValetSettings::class.java)
-        fun <R : Any> settingsDelegator(name: String? = null): ReadOnlyProperty<ValetSettings, R> =
+        fun <R : Any> settingsDelegator(name: String? = null): ReadOnlyProperty<Any, R> =
             // CHECK: Must it be assumed that IntelliJ may replace the service instance at any moment or is
-            ReadOnlyProperty<ValetSettings, R> { thisRef, property ->
-                //  it save to store a reference?
+            ReadOnlyProperty<Any, R> { thisRef, property -> //  it save to store a reference?
                 val settings = ServiceManager.getService(ValetSettings::class.java)
                 settings.settingsSstate.readInstanceProperty<R>(name ?: property.name)
             }
