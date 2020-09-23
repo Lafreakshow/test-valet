@@ -94,7 +94,7 @@ listOf("compileKotlin", "compileTestKotlin").forEach {
         kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
 
         kotlinOptions.languageVersion = "1.4"
-        kotlinOptions.apiVersion = "1.3"
+        kotlinOptions.apiVersion = "1.4"
     }
 }
 
