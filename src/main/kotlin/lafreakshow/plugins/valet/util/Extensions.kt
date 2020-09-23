@@ -17,21 +17,13 @@
 package lafreakshow.plugins.valet.util
 
 import com.intellij.openapi.diagnostic.Logger
-import org.intellij.markdown.flavours.gfm.table.GitHubTableMarkerProvider.Companion.contains
-import org.jetbrains.builtInWebServer.validateToken
-import org.jetbrains.kotlin.idea.debugger.isInlineFunctionLineNumber
-import org.jetbrains.kotlin.resolve.calls.components.checkSimpleArgument
-import org.jetbrains.kotlin.scripting.resolve.classId
 import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
-import kotlin.reflect.jvm.javaType
-import kotlin.reflect.typeOf
-
 
 // Logging Stuff
 // =============
@@ -50,14 +42,15 @@ fun Logger.debug(provider: () -> String) {
 
 /**
  * Build a string of the form:
- *     [var|val] [receiverClass.simpleName].[property.name]:[Type] = [property value]
+ *     [var|val] [receiverClass.simpleName].[property.name]:[Type] = [property value].
  */
 fun <R> KProperty0<R>.toDebugString() = buildString {
     val prop = this@toDebugString
-    if (prop is KMutableProperty<*>)
+    if (prop is KMutableProperty<*>) {
         append("var")
-    else
+    } else {
         append("val")
+    }
 
     append(" ").append(prop.javaField?.declaringClass?.kotlin?.simpleName).append(".").append(prop.name)
     append(": ").append(typeToString(prop.returnType))
@@ -67,13 +60,20 @@ fun <R> KProperty0<R>.toDebugString() = buildString {
 @OptIn(ExperimentalStdlibApi::class)
 private fun typeToString(type: KType): String {
     if (type.classifier is KClass<*>) {
-        val arguments = if (type.arguments.isNotEmpty())
+        val arguments = if (type.arguments.isNotEmpty()) {
             type.arguments.joinToString(", ", "<", ">") {
                 it.type?.let { it1 -> typeToString(it1) } ?: "<*>"
             }
-        else ""
+        } else ""
 
         return "${(type.classifier as KClass<*>).simpleName}$arguments${if (type.isMarkedNullable) "?" else ""}"
-    } else
+    } else {
         return type.toString()
+    }
+}
+
+// Convenience Stuff
+fun <R : Any> Any.readInstanceProperty(name: String): R {
+    val memProp = this::class.memberProperties.first { it.name == name } as KProperty1<Any, *>
+    return memProp.get(this) as R
 }

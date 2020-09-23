@@ -17,10 +17,13 @@
 package lafreakshow.plugins.valet.util
 
 import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import strikt.api.expectThat
+import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import kotlin.reflect.KProperty0
+import kotlin.reflect.full.IllegalCallableAccessException
 
 internal class DummyClass(val value: Int = 2)
 internal class DummyClassWithToString(private val value: Int = 5) {
@@ -28,10 +31,11 @@ internal class DummyClassWithToString(private val value: Int = 5) {
 }
 
 internal class ExtensionsTest {
-    private val propString = "test"
-    private val propInt = 2
-    private val propDouble = 3.5
-    private val propBool = true
+    // These four need to be public so they can be reflected on
+    val propString = "test"
+    val propInt = 2
+    val propDouble = 3.5
+    val propBool = true
 
     private val propStringN: String? = "test"
     private val propStringN2: String? = null
@@ -39,6 +43,7 @@ internal class ExtensionsTest {
     private val propDoubleN: Double? = 3.5
     private val propBoolN: Boolean? = true
 
+    // this must be private to test reflective access failing
     private val propObject = DummyClass()
     private val propObjectWithString = DummyClassWithToString()
 
@@ -53,13 +58,28 @@ internal class ExtensionsTest {
     private val mutableListProp: MutableList<String> = mutableListOf("test1", "test2", "test3")
     private val mutableMapProp: MutableMap<String, Int> = mutableMapOf("test1" to 3, "test2" to 4, "test5" to 7)
 
+    @Test
+    fun testReadInstanceProperty() {
+        // Conveniently, we already have a bunch of properties in this class
+        expectThat(this.readInstanceProperty<String>("propString")).isEqualTo(propString)
+        expectThat(this.readInstanceProperty<Int>("propInt")).isEqualTo(propInt)
+        expectThat(this.readInstanceProperty<Double>("propDouble")).isEqualTo(propDouble)
+        expectThat(this.readInstanceProperty<Boolean>("propBool")).isEqualTo(propBool)
+
+        expectThrows<IllegalCallableAccessException> {
+            // This is private
+            this.readInstanceProperty("propObject")
+        }
+    }
 
     @TestFactory
     fun toDebugString(): List<DynamicTest> {
         mutableListProp.add("54")
 
         fun with(
-            prop: KProperty0<*>, isVal: Boolean, typeString: String,
+            prop: KProperty0<*>,
+            isVal: Boolean,
+            typeString: String,
             expectedReceiver: String = this::class.simpleName!!,
         ): DynamicTest {
             val expected = "${if (isVal) "val" else "var"} $expectedReceiver.${prop.name}: $typeString = ${prop.get()}"
