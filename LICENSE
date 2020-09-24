@@ -1,25 +1,4 @@
 
-
-As of writing this, the repository contains the original icons from Test Navigator, which I assume where made by the
- Author. Test Navigator is licensed under Apache 2.0, and so I hope that using them is no problem. At some point
- before version 1.0 (or immediately, should the Author of these icons ask so), I plan to replace them with something
- custom-made.
-
-NOTE: WHATEVER TERMS THE AUTHOR SET FOR THE ORIGINAL ICONS APPLY TO THE COPIES IN THIS REPO. They are not meant to
- redistributed as part of the final plugin and if you read this, then it is likely in the commit history a good while
- after the 1.0 release. In this case and if you intend to use this version then I only ask that if they are still
- in the repository at this point, you replace them with whatever I used as their replacement in future versions. If you
- happen to be the Authors lawyer, I can only hope that we can come to an agreement in private. I have no interest in
- violating anyone's copyright and will comply as soon as it is humanly possible for me.
-
-The line immediately following this serves only to allow automated tools to remind whoever is working on this repository
-that the items are yet to be replaced.
-
-# TODO Replace Original Icons
-
- Outside of this, the following license applies to this project:
-
-
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
