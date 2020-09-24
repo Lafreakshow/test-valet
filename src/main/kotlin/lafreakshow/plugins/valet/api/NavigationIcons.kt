@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package lafreakshow.plugins.valet.gutter
+package lafreakshow.plugins.valet.api
 
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.openapi.util.IconLoader
@@ -22,12 +22,12 @@ import com.intellij.psi.PsiElement
 import javax.swing.Icon
 
 object NavigationIcons {
-    val testClassFound: Icon by lazy { IconLoader.getIcon("/icons/greenTest.png") }
-    val testClassMissing: Icon by lazy { IconLoader.getIcon("/icons/greenTest.png") }
-    val testClassWithoutCases: Icon by lazy { IconLoader.getIcon("/icons/yellowTest.png") }
+    val testClassFound: Icon by lazy { IconLoader.getIcon("/icons/testExists.svg") }
+    val testClassMissing: Icon by lazy { IconLoader.getIcon("/icons/testMissing.svg") }
+    val testClassWithoutCases: Icon by lazy { IconLoader.getIcon("/icons/testNoCase.svg") }
 
-    val sourceClassFound: Icon by lazy { IconLoader.getIcon("/icons/greenSource.png") }
-    val sourceClassMissing: Icon by lazy { IconLoader.getIcon("/icons/redSource.png") }
+    val sourceClassFound: Icon by lazy { IconLoader.getIcon("/icons/sourceExists.svg") }
+    val sourceClassMissing: Icon by lazy { IconLoader.getIcon("/icons/sourceMissing.svg") }
 }
 
 data class NavigationIconBuilder(
@@ -50,4 +50,9 @@ data class NavigationIconBuilder(
         NavigationGutterIconBuilder.create(icon)
             .setTooltipText(tooltipText)
             .setTargets(targets)
+
+    fun forTarget(target: PsiElement): NavigationGutterIconBuilder<PsiElement> =
+        NavigationGutterIconBuilder.create(icon)
+            .setTooltipText(tooltipText)
+            .setTarget(target)
 }

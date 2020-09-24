@@ -17,6 +17,11 @@
 package lafreakshow.plugins.valet.util
 
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.roots.FileIndexFacade
+import com.intellij.openapi.roots.TestModuleProperties
+import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty0
@@ -84,4 +89,22 @@ private fun typeToString(type: KType): String {
 fun <R : Any> Any.readInstanceProperty(name: String): R {
     val memProp = this::class.memberProperties.first { it.name == name } as KProperty1<Any, *>
     return memProp.get(this) as R
+}
+
+fun getModuleSearchScope(element: PsiElement): Optional<GlobalSearchScope> {
+    val vFile = element.containingFile.virtualFile
+    val project = element.project
+
+    val module = FileIndexFacade.getInstance(project).getModuleForFile(vFile)
+
+    return if (module != null) {
+        val testService = module.getService(TestModuleProperties::class.java)
+        // Use the service to see if there may be a production module belonging to the elements module
+        // If there is no production module defined then use the scope of the elements module directly.
+        val scope = testService.productionModule?.moduleScope ?: module.moduleTestsWithDependentsScope
+
+        Optional.of(scope)
+    } else {
+        Optional.empty()
+    }
 }

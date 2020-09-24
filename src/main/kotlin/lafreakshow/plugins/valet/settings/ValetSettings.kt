@@ -47,4 +47,6 @@ class ValetSettings : PersistentStateComponent<ValetSettingsState> {
 
 data class ValetSettingsState(
     var testSuffixes: ArrayList<String> = arrayListOf("Test", "KtTest"),
-)
+    var maximumDebugMode: Boolean = true,
+) {
+}

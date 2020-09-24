@@ -22,8 +22,4 @@
                 id="lafreakshow.plugins.valet.settings.ValetSettingsConfigurable"
                 displayName="Test Valet"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="lafreakshow.plugins.valet.DynamicReloadListener" topic="com.intellij.ide.plugins.DynamicPluginListener"/>
-    </applicationListeners>
 </idea-plugin>
