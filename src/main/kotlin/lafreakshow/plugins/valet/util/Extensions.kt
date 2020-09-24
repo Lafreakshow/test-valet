@@ -37,6 +37,14 @@ fun Logger.debug(provider: () -> String) {
     if (this.isDebugEnabled) this.debug(provider())
 }
 
+fun Logger.trace(provider: () -> String) {
+    if (this.isTraceEnabled) this.trace(provider())
+}
+
+fun <R> Logger.trace(prop: KProperty0<R>) {
+    if (this.isTraceEnabled) this.trace(prop.toDebugString())
+}
+
 // Debugging Extensions
 // ====================
 
