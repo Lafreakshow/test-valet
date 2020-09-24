@@ -145,7 +145,7 @@ reckon {
 // Make sure the project is in reasonable shape before allowing a tag to be created. All in all this requires the repo
 // to be clean, a build to succeed, a non-build-failing run of detekt and tests to pass.
 tasks.reckonTagCreate {
-    dependsOn(":common:check")
+    dependsOn(":check")
 }
 
 tasks.test {
