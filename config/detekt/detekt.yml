@@ -58,7 +58,7 @@ comments:
   UndocumentedPublicFunction:
     active: true
   UndocumentedPublicProperty:
-    active: true
+    active: false
 
 complexity:
   active: true
@@ -71,7 +71,7 @@ complexity:
     includeStaticDeclarations: false
     includePrivateDeclarations: false
   ComplexMethod:
-    active: true
+    active: false
     threshold: 15
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
@@ -81,13 +81,13 @@ complexity:
     active: false
     ignoredLabels: []
   LargeClass:
-    active: true
+    active: false
     threshold: 600
   LongMethod:
-    active: true
+    active: false
     threshold: 60
   LongParameterList:
-    active: true
+    active: false
     functionThreshold: 6
     constructorThreshold: 7
     ignoreDefaultParameters: false
@@ -97,10 +97,10 @@ complexity:
     active: false
     threshold: 6
   NestedBlockDepth:
-    active: true
+    active: false
     threshold: 4
   StringLiteralDuplication:
-    active: false
+    active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     threshold: 3
     ignoreAnnotation: true
