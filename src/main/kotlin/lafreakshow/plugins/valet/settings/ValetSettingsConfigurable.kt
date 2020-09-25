@@ -21,7 +21,7 @@ import com.intellij.ui.layout.PropertyBinding
 import com.intellij.ui.layout.panel
 
 class ValetSettingsConfigurable : BoundConfigurable("Valet Test") {
-    val settings = ValetSettings.getInstance().settingsSstate
+    val settings = ValetSettings.getInstance().settingsState
 
     val suffixBinding = PropertyBinding<String>(
         { settings.testSuffixes.joinToString(", ") },

@@ -29,13 +29,15 @@ import lafreakshow.plugins.valet.util.logger
 import lafreakshow.plugins.valet.util.trace
 import java.util.*
 
+/** Extension implementation to provide Test Valet Icons for Java files. */
 class JavaGutterMarkerProvider : GutterMarkerProvider(JavaValetFile::class)
 
+/** Contains logic required to provide Icons for Java files. */
 class JavaValetFile : ValetFile {
     private val log: Logger by logger()
     private val testSuffixes: ArrayList<String> by ValetSettings.settingsDelegator()
 
-    lateinit var clazz: PsiClass
+    private lateinit var clazz: PsiClass
 
     override fun accept(element: PsiElement): Boolean =
         // Anonymous java classes  will have qualifiedName be null. We can't do anything with them
@@ -103,5 +105,6 @@ private val TEST_ANNOTATION_NAMES = listOf(
     "org.junit.jupiter.api.TestTemplate",
 )
 
+/** Return true if the given class has a known test case. */
 fun hasTestCase(psiClass: PsiClass): Boolean =
     psiClass.methods.any { method -> TEST_ANNOTATION_NAMES.any { method.hasAnnotation(it) } }

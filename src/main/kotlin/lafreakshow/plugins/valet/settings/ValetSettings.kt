@@ -20,33 +20,57 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import lafreakshow.plugins.valet.settings.ValetSettings.Companion.getInstance
+import lafreakshow.plugins.valet.settings.ValetSettings.Companion.settingsDelegator
 import lafreakshow.plugins.valet.util.readInstanceProperty
 import kotlin.properties.ReadOnlyProperty
 
+/**
+ * Application service to access the settings for the plugin.
+ *
+ * Use [getInstance] to ... get an instance.
+ *
+ * Use[settingsDelegator] to directly adress settings by their name by delegate
+ *
+ * Use [settingsState] if you need to change settings.
+ *
+ * @constructor Create empty Valet settings
+ */
 @State(name = "ValetSettings", storages = [Storage("lafreakshow/TestValet.xml")])
 class ValetSettings : PersistentStateComponent<ValetSettingsState> {
-    var settingsSstate = ValetSettingsState()
+    var settingsState: ValetSettingsState = ValetSettingsState()
         private set
 
     companion object {
-        fun getInstance() = ServiceManager.getService(ValetSettings::class.java)
+        /** Returns the instance of the service. */
+        fun getInstance(): ValetSettings = ServiceManager.getService(ValetSettings::class.java)
+
+        /**
+         * get a delaggate to the setting with the given name. If no name is given, will use the name of the property
+         * that is being delegated
+         */
         fun <R : Any> settingsDelegator(name: String? = null): ReadOnlyProperty<Any, R> =
-            // CHECK: Must it be assumed that IntelliJ may replace the service instance at any moment or is
-            ReadOnlyProperty<Any, R> { thisRef, property -> //  it save to store a reference?
+            ReadOnlyProperty<Any, R> { _, property ->
+                // CHECK: Must it be assumed that IntelliJ may replace the service instance at any moment or is
+                // it safe to store a reference?
                 val settings = ServiceManager.getService(ValetSettings::class.java)
-                settings.settingsSstate.readInstanceProperty<R>(name ?: property.name)
+                settings.settingsState.readInstanceProperty<R>(name ?: property.name)
             }
     }
 
-    override fun getState(): ValetSettingsState? = settingsSstate.copy()
+    override fun getState(): ValetSettingsState? = settingsState.copy()
 
     override fun loadState(state: ValetSettingsState) {
-        settingsSstate = state.copy()
+        settingsState = state.copy()
     }
 }
 
+/**
+ * Contains the settings for the plugin.
+ *
+ * @property testSuffixes list of suffixes of test files or classes
+ *
+ */
 data class ValetSettingsState(
     var testSuffixes: ArrayList<String> = arrayListOf("Test", "KtTest"),
-    var maximumDebugMode: Boolean = true,
-) {
-}
+)

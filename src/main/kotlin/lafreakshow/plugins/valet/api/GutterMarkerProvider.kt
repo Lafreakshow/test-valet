@@ -31,12 +31,19 @@ import lafreakshow.plugins.valet.util.trace
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-enum class ElementSupport {
-    TEST_CLASS, SOURCE_CLASS, UNSUPPORTED
-}
-
 internal typealias ResultList = MutableCollection<in RelatedItemLineMarkerInfo<*>>
 
+/**
+ * Base class adding support for languages.
+ *
+ * The java implementation is the reference implementation so for an example take a look at
+ * JavaGutterMarkerProvider.kt in the languages package.
+ *
+ * Create a subclass of [GutterMarkerProvider] and pass a [ValetFile] subclass to the super constructor. Then
+ * register your subclass as an extension with IntelliJ. Most of the functionality should be implemented in a
+ * [ValetFile] subclass. It is perfectly possible for [GutterMarkerProvider] subclasses to not even have a body.
+ */
+// TODO: Split collectNavigationMarkers into multiple functions for easier maintainability,
 abstract class GutterMarkerProvider(private val valetFileClass: KClass<out ValetFile>) :
     RelatedItemLineMarkerProvider() {
     protected open val log: Logger by logger()
