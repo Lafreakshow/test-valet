@@ -97,15 +97,28 @@ intellij {
     // but support for earlier versions may be added if there is demand.
     version = ideaVersion
 
-    setPlugins("java")
+    setPlugins("java", "Kotlin")
     updateSinceUntilBuild = true
     configureDefaultDependencies = true
 }
 
+afterEvaluate {
+}
+
 dependencies {
     // IntelliJ 2020.2 comes with Kotlin 1.3.73 so to make sure that we can use 1.4 features we depend on it explicitly.
-    implementation(kotlin("reflect", "1.4+"))
-    implementation(kotlin("stdlib", "1.4+"))
+    //
+    // Note that with a dependency on the kotlin plugin in plugin.xml I'm having issues getting the right version of
+    // the kotlin std lib and reflect to load both during compile and at runtime. My understanding is that
+    // dependencies of the implementation configuration should end up in both the compile classpath and the runtime
+    // classpath but apparently that is not working. Adding them as compileOnly will allow it to compile but throw on
+    // runtime while runtimeOnly will allow it to run fine but not compile. I don't know exactly what causes all this
+    // so for now I simpl have to declare *both*.
+    compileOnly(kotlin("reflect", "1.4+"))
+    runtimeOnly(kotlin("reflect", "1.4+"))
+    compileOnly(kotlin("stdlib", "1.4+"))
+    runtimeOnly(kotlin("stdlib", "1.4+"))
+
 
     testImplementation("io.strikt:strikt-core:$versionStrikt")
     testImplementation("org.junit.jupiter:junit-jupiter:$versionJUnit")
@@ -162,7 +175,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-
 tasks.withType<KotlinCompile>() {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -176,7 +188,6 @@ tasks.withType<KotlinCompile>() {
         apiVersion = "1.4"
     }
 }
-
 
 // reckon needs to have some info passed via properties to create tags.
 reckon {
