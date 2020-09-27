@@ -22,7 +22,7 @@ import com.intellij.psi.PsiElement
 import javax.swing.Icon
 
 /**
- * Properties contain the raw icon used by the Plugins. If want to add gutter icon support for other languages, use
+ * Properties contain the raw icon used by the Plugins. If you want to add gutter icon support for other languages, use
  * [NavigationIconBuilder] instead.
  */
 object NavigationIcons {

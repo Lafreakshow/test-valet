@@ -34,10 +34,10 @@ import kotlin.reflect.full.createInstance
 internal typealias ResultList = MutableCollection<in RelatedItemLineMarkerInfo<*>>
 
 /**
- * Base class adding support for languages.
+ * Base class adding support for lafreakshow.plugins.valet.languages.
  *
  * The java implementation is the reference implementation so for an example take a look at
- * JavaGutterMarkerProvider.kt in the languages package.
+ * JavaGutterMarkerProvider.kt in the lafreakshow.plugins.valet.languages package.
  *
  * Create a subclass of [GutterMarkerProvider] and pass a [ValetFile] subclass to the super constructor. Then
  * register your subclass as an extension with IntelliJ. Most of the functionality should be implemented in a
