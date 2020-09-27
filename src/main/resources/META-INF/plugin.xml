@@ -11,15 +11,21 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
-    <depends optional="true" config-file="withJava.xml">com.intellij.modules.java</depends>
+
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService
-                serviceImplementation="lafreakshow.plugins.valet.settings.ValetSettings"/>
-
+        <applicationService serviceImplementation="lafreakshow.plugins.valet.settings.ValetSettings"/>
         <applicationConfigurable
                 instance="lafreakshow.plugins.valet.settings.ValetSettingsConfigurable"
                 id="lafreakshow.plugins.valet.settings.ValetSettingsConfigurable"
-                displayName="Test Valet"/>
+                displayName="Test Valet"
+        />
+
+        <codeInsight.lineMarkerProvider
+                language="JAVA"
+                implementationClass="lafreakshow.plugins.valet.languages.JavaGutterMarkerProvider"
+        />
     </extensions>
 </idea-plugin>
