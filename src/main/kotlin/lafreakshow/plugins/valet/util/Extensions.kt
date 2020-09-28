@@ -34,25 +34,25 @@ import kotlin.reflect.jvm.javaField
 // =============
 
 /** Returns a logger with the name of the receiver class. */
-fun <R : Any> R.logger(): Lazy<Logger> = lazy { Logger.getInstance(this::class.java) }
+internal fun <R : Any> R.logger(): Lazy<Logger> = lazy { Logger.getInstance(this::class.java) }
 
 /** Logs a property. See [toDebugString] for details */
-fun <T : Any> Logger.logValue(prop: KProperty0<T>) {
+internal fun <T : Any> Logger.logValue(prop: KProperty0<T>) {
     this.debug(prop.toDebugString())
 }
 
 /** Logs the  string returned by provider at the debug level. Provider will only be called if debug level is enabled. */
-fun Logger.debug(provider: () -> String) {
+internal fun Logger.debug(provider: () -> String) {
     if (this.isDebugEnabled) this.debug(provider())
 }
 
 /** Logs the  string returned by provider at the trace level. Provider will only be called if trace level is enabled. */
-fun Logger.trace(provider: () -> String) {
+internal fun Logger.trace(provider: () -> String) {
     if (this.isTraceEnabled) this.trace(provider())
 }
 
 /** Like [logValue] but outputs at trace level. */
-fun <R> Logger.trace(prop: KProperty0<R>) {
+internal fun <R> Logger.trace(prop: KProperty0<R>) {
     if (this.isTraceEnabled) this.trace(prop.toDebugString())
 }
 
@@ -63,7 +63,7 @@ fun <R> Logger.trace(prop: KProperty0<R>) {
  * Build a string of the form:
  *     [var|val] [receiverClass.simpleName].[property.name]:[Type] = [property value].
  */
-fun <R> KProperty0<R>.toDebugString(): String = buildString {
+internal fun <R> KProperty0<R>.toDebugString(): String = buildString {
     val prop = this@toDebugString
     if (prop is KMutableProperty<*>) {
         append("var")
@@ -97,7 +97,7 @@ private fun typeToString(type: KType): String = if (type.classifier is KClass<*>
  * @throws ClassCastException if the property's value cannot be cast to [R]
  */
 @Suppress("UNCHECKED_CAST")
-fun <R : Any> Any.readInstanceProperty(name: String): R {
+internal fun <R : Any> Any.readInstanceProperty(name: String): R {
     val memProp = this::class.memberProperties.first { it.name == name } as KProperty1<Any, *>
     return memProp.get(this) as R
 }
@@ -111,7 +111,7 @@ fun <R : Any> Any.readInstanceProperty(name: String): R {
  *
  * Will return an empty Optional if [element] does not belong to any module.
  * */
-fun getModuleSearchScope(element: PsiElement): Optional<GlobalSearchScope> {
+internal fun getModuleSearchScope(element: PsiElement): Optional<GlobalSearchScope> {
     val vFile = element.containingFile.virtualFile
     val project = element.project
 
