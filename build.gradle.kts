@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.util.removeSuffixIfPresent
 
 buildscript {
     repositories {
-        // This is here to fix a missing dependency issue with intelliJ plugin introduced in 0.25 und still present 
+        // This is here to fix a missing dependency issue with intelliJ plugin introduced in 0.25 und still present
         // in 0.26. It should hopefully be fixed in 0.27.
         maven {
             url = uri("https://jetbrains.bintray.com/intellij-plugin-service")
@@ -39,20 +39,20 @@ buildscript {
 // Note that as of writing this will only remove the hash of dev version. I did this to avoid unexpectedly different
 // versions whenever possible and most of the cases in which this will be useful (I.e. during fast iteration) are
 // expected to be dev versions.
-val hashlessVersionProvider = provider {
+val hashlessVersionProvider: Provider<String> = provider {
     project.version.toString()
         .replaceAfterLast("dev", "")
         .removeSuffixIfPresent("+")
 }
-val hashlessVersion by ProviderDelegate<String> { hashlessVersionProvider.get() }
+val hashlessVersion: String by ProviderDelegate { hashlessVersionProvider.get() }
 
 // Try to keep all dependency related version stuff here for easy of maintainability
-val versionJUnit by rootProject.extra("5.7.0")
-val versionStrikt by rootProject.extra("0.27.0")
-val kotlinLibVersion by rootProject.extra("1.4+")
+val versionJUnit: String by rootProject.extra("5.7.0")
+val versionStrikt: String by rootProject.extra("0.27.0")
+val kotlinLibVersion: String by rootProject.extra("1.4+")
 
 // Minimum version of Idea to build against. Also used by the intelliJ plugin to resolve plugin dependencies.
-val ideaVersion by rootProject.extra("2020.2")
+val ideaVersion: String by rootProject.extra("2020.2")
 
 plugins {
     // Required for buildings
@@ -117,8 +117,12 @@ dependencies {
     // barely functioning on good days, It turns out that a simple custom configuration can do it way more reliable.
     // So this is what the priority configuration is all about. Further down it is prepended to the source sets
     // classpath, which is the part that actually solves the issue.
-    priority(kotlin("reflect", kotlinLibVersion))
     priority(kotlin("stdlib", kotlinLibVersion))
+    priority(kotlin("reflect", kotlinLibVersion))
+
+    // For some reason without this kotlin reflect, and only kotlin reflect, doesn't end up in the distribution image.
+    // I'm not quite sure why this happens. By which I mean I absolutely no idea (pun not intended).
+    configurations.runtimeClasspath.configure { extendsFrom(priority) }
 
     testImplementation("io.strikt:strikt-core:$versionStrikt")
     testImplementation("org.junit.jupiter:junit-jupiter:$versionJUnit")
@@ -183,7 +187,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf(
