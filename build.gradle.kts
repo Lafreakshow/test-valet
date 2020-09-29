@@ -49,6 +49,7 @@ val hashlessVersion by ProviderDelegate<String> { hashlessVersionProvider.get() 
 // Try to keep all dependency related version stuff here for easy of maintainability
 val versionJUnit by rootProject.extra("5.7.0")
 val versionStrikt by rootProject.extra("0.27.0")
+val kotlinLibVersion by rootProject.extra("1.4+")
 
 // Minimum version of Idea to build against. Also used by the intelliJ plugin to resolve plugin dependencies.
 val ideaVersion by rootProject.extra("2020.2")
@@ -102,28 +103,36 @@ intellij {
     configureDefaultDependencies = true
 }
 
-afterEvaluate {
-}
+val priority: Configuration by configurations.creating
 
 dependencies {
     // IntelliJ 2020.2 comes with Kotlin 1.3.73 so to make sure that we can use 1.4 features we depend on it explicitly.
     //
     // Note that with a dependency on the kotlin plugin in plugin.xml I'm having issues getting the right version of
-    // the kotlin std lib and reflect to load both during compile and at runtime. My understanding is that
-    // dependencies of the implementation configuration should end up in both the compile classpath and the runtime
-    // classpath but apparently that is not working. Adding them as compileOnly will allow it to compile but throw on
-    // runtime while runtimeOnly will allow it to run fine but not compile. I don't know exactly what causes all this
-    // so for now I simpl have to declare *both*.
-    compileOnly(kotlin("reflect", "1.4+"))
-    runtimeOnly(kotlin("reflect", "1.4+"))
-    compileOnly(kotlin("stdlib", "1.4+"))
-    runtimeOnly(kotlin("stdlib", "1.4+"))
-
+    // the kotlin std lib and reflect to load both during compile and at runtime. The problem here is that tmy
+    // explicitly declared dependencies for some reason end up further down the classpath than the jard that come
+    // with IntelliJ, which causes the Classloader to load an incompatible version of certain classes.
+    //
+    // After spending the entire day on a solution that was almost longer than the entire entire build script and
+    // barely functioning on good days, It turns out that a simple custom configuration can do it way more reliable.
+    // So this is what the priority configuration is all about. Further down it is prepended to the source sets
+    // classpath, which is the part that actually solves the issue.
+    priority(kotlin("reflect", kotlinLibVersion))
+    priority(kotlin("stdlib", kotlinLibVersion))
 
     testImplementation("io.strikt:strikt-core:$versionStrikt")
     testImplementation("org.junit.jupiter:junit-jupiter:$versionJUnit")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$versionJUnit")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$versionJUnit")
+}
+
+sourceSets.main.configure {
+    compileClasspath = priority + compileClasspath
+    runtimeClasspath = priority + runtimeClasspath
+}
+sourceSets.test.configure {
+    compileClasspath = priority + compileClasspath
+    runtimeClasspath = priority + runtimeClasspath
 }
 
 tasks.jar {
@@ -158,8 +167,7 @@ detekt {
     // written in kotlin, there will often be a module-info.java in the Java source set.
     input = objects.fileCollection().from(
         DetektExtension.DEFAULT_SRC_DIR_JAVA, "src/test/java",
-        DetektExtension.DEFAULT_SRC_DIR_KOTLIN, "src/test/kotlin",
-        "src/languageJavaLike/kotlin"
+        DetektExtension.DEFAULT_SRC_DIR_KOTLIN, "src/test/kotlin"
     )
 
     // This will make detekt start with the default rules enabled and then apply any custom configuration from config
