@@ -19,6 +19,8 @@ package lafreakshow.plugins.valet.util
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
@@ -116,5 +118,15 @@ internal class ExtensionsTest {
             with(this::mutableListProp, true, "List<String>"),
             with(this::mutableMapProp, true, "Map<String, Int>"),
         )
+    }
+
+    @ParameterizedTest(name = "{index} => \"{0}\".removeSuffixOrNull(\"{1}\") should return {2}")
+    @CsvSource(
+        "TestStringWithSuffix, Suffix, TestStringWith",
+        "TestStringWithSuffix, Nope, ",
+        "TestStringWithSuffix, With, "
+    )
+    fun testRemoveSuffixOrNull(input: String, suffix: String, expected: String?) {
+        expectThat(input.removeSuffixOrNull(suffix)).isEqualTo(expected)
     }
 }

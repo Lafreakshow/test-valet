@@ -20,6 +20,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.roots.FileIndexFacade
 import com.intellij.openapi.roots.TestModuleProperties
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.GlobalSearchScope
 import java.util.*
 import kotlin.reflect.KClass
@@ -128,3 +129,24 @@ internal fun getModuleSearchScope(element: PsiElement): Optional<GlobalSearchSco
         Optional.empty()
     }
 }
+
+/**
+ *  Returns a string representation of the given element. The resulting string will contain the elements class name
+ * and if the element is a PsiNamedElement, it will also contain its name.
+ */
+internal fun computePsiElementString(element: PsiElement): String =
+    if (element is PsiNamedElement) {
+        "\"${element::class.simpleName} ${element.name}\""
+    } else {
+        "\"${element::class.simpleName}\""
+    }
+
+/** Returns this string with suffix removed or null if this string doe not end with suffix. */
+internal fun String.removeSuffixOrNull(suffix: String): String? =
+    if (this.endsWith(suffix)) this.removeSuffix(suffix) else null
+
+/** Return this string with the first matching suffix in `suffixes` removed. */
+internal fun String.removeFirstMatchingSuffix(suffixes: Iterable<String>): String =
+    suffixes.mapNotNull(this::removeSuffixOrNull).first()
+
+internal fun String.withSuffixVariants(suffixes: Iterable<String>) = suffixes.map { this + it }

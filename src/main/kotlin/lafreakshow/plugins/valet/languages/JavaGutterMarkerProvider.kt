@@ -24,9 +24,13 @@ import lafreakshow.plugins.valet.api.GutterMarkerProvider
 import lafreakshow.plugins.valet.api.TestElementList
 import lafreakshow.plugins.valet.api.ValetFile
 import lafreakshow.plugins.valet.settings.ValetSettings
+import lafreakshow.plugins.valet.util.JvmLanguageUtil.findJvmElementsNamed
+import lafreakshow.plugins.valet.util.JvmLanguageUtil.hasSuffixes
+import lafreakshow.plugins.valet.util.JvmLanguageUtil.splitIntoTestElementList
 import lafreakshow.plugins.valet.util.getModuleSearchScope
 import lafreakshow.plugins.valet.util.logger
 import lafreakshow.plugins.valet.util.trace
+import lafreakshow.plugins.valet.util.withSuffixVariants
 import java.util.*
 
 /** Extension implementation to provide Test Valet Icons for Java files. */
@@ -49,9 +53,7 @@ class JavaValetFile : ValetFile {
 
     override fun isSource(): Boolean = !isTest()
 
-    override fun isTest(): Boolean =
-        // If name is null checking for a suffix will always fail so we can shortcut to false
-        clazz.name?.let { className -> testSuffixes.any { className.endsWith(it) } } ?: false
+    override fun isTest(): Boolean = hasSuffixes(clazz, testSuffixes)
 
     override fun getSources(): List<PsiElement> {
         // JavaValetFile shouldn't accept Anonymous classes, so it shouldn't be possible for qualifiedName to
@@ -62,23 +64,18 @@ class JavaValetFile : ValetFile {
                 clazz.qualifiedName!!.removeSuffix(it)
             } else null
         }
+        log.trace(this::testSuffixes)
 
         return findNamedClasses(namesToSearch)
     }
 
-    override fun getTests(): TestElementList {
-        // See getSource for why qualifiedName can't be null
-        val namesToSearch = testSuffixes.map { clazz.qualifiedName + it }
-        val foundClasses = findNamedClasses(namesToSearch)
-        val (withCases, noCases) = foundClasses.partition { hasTestCase(it) }
+    override fun getTests(): TestElementList = splitIntoTestElementList(
+        clazz,
+        clazz.qualifiedName!!.withSuffixVariants(testSuffixes)
+    )
 
-        return if (foundClasses.isEmpty()) {
-            TestElementList.empty()
-        } else {
-            TestElementList(withCases, noCases)
-        }
-    }
-
+    // TODO: Have to make significant changes here so it can also support tests or sources written in other jvm
+    //  languages.
     private fun findNamedClasses(namesToSearch: List<String>): List<PsiClass> {
         val optionalSearchScope = getModuleSearchScope(clazz)
         val psiFacade = JavaPsiFacade.getInstance(clazz.project)
@@ -89,7 +86,7 @@ class JavaValetFile : ValetFile {
             log.trace { "Searching for: ${namesToSearch.joinToString(", ")}" }
             log.trace { "Scope: $scope" }
 
-            namesToSearch.mapNotNull { psiFacade.findClass(it, scope) }
+            findJvmElementsNamed(scope, namesToSearch).filterIsInstance<PsiClass>()
         } else emptyList()
     }
 }

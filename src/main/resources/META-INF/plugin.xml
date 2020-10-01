@@ -27,5 +27,10 @@
                 language="JAVA"
                 implementationClass="lafreakshow.plugins.valet.languages.JavaGutterMarkerProvider"
         />
+
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="lafreakshow.plugins.valet.languages.KotlinGutterMarkerProvider"
+        />
     </extensions>
 </idea-plugin>

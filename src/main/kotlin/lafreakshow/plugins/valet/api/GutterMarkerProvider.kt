@@ -25,6 +25,7 @@ import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLAS
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_MISSING
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_WITHOUT_CASES
+import lafreakshow.plugins.valet.util.computePsiElementString
 import lafreakshow.plugins.valet.util.debug
 import lafreakshow.plugins.valet.util.logger
 import lafreakshow.plugins.valet.util.trace
@@ -52,13 +53,13 @@ abstract class GutterMarkerProvider(private val valetFileClass: KClass<out Valet
         val valetFile = valetFileClass.createInstance()
 
         if (valetFile.accept(element)) {
-            log.debug { "${valetFileClass.simpleName} Accepts $element" }
+            log.debug { "${valetFileClass.simpleName} Accepts ${computePsiElementString(element)}" }
 
             if (valetFile.isTest()) {
-                log.trace { "$element is a test" }
+                log.trace { "${computePsiElementString(element)} is a test" }
 
                 val sources = valetFile.getSources()
-                log.trace { "Sources: ${sources.joinToString(", ")}" }
+                log.trace { "Sources: ${sources.joinToString(", ", transform = ::computePsiElementString)}" }
 
                 if (sources.isEmpty()) {
                     val markerBuilder = SOURCE_CLASS_MISSING.forTarget(element)
@@ -68,11 +69,11 @@ abstract class GutterMarkerProvider(private val valetFileClass: KClass<out Valet
                     result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
                 }
             } else if (valetFile.isSource()) {
-                log.trace { "$element is a source" }
+                log.trace { "${computePsiElementString(element)} is a source" }
 
                 val (withCases, noCases) = valetFile.getTests()
-                log.trace { "Tests (case)   :  $withCases" }
-                log.trace { "Tests (no case):  $noCases" }
+                log.trace { "Tests (case)   :  ${withCases.joinToString(", ", transform = ::computePsiElementString)}" }
+                log.trace { "Tests (no case):  ${noCases.joinToString(", ", transform = ::computePsiElementString)}" }
 
                 if (withCases.isEmpty() && noCases.isEmpty()) {
                     val markerBuilder = TEST_CLASS_MISSING.forTarget(element)
