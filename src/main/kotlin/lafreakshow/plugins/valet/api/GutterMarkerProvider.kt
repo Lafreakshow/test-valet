@@ -20,7 +20,6 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiElement
-import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_MISSING
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_MISSING
@@ -35,7 +34,7 @@ import kotlin.reflect.full.createInstance
 internal typealias ResultList = MutableCollection<in RelatedItemLineMarkerInfo<*>>
 
 /**
- * Base class adding support for lafreakshow.plugins.valet.languages.
+ * Base class adding support for languages.
  *
  * The java implementation is the reference implementation so for an example take a look at
  * JavaGutterMarkerProvider.kt in the lafreakshow.plugins.valet.languages package.
@@ -44,7 +43,6 @@ internal typealias ResultList = MutableCollection<in RelatedItemLineMarkerInfo<*
  * register your subclass as an extension with IntelliJ. Most of the functionality should be implemented in a
  * [ValetFile] subclass. It is perfectly possible for [GutterMarkerProvider] subclasses to not even have a body.
  */
-// TODO: Split collectNavigationMarkers into multiple functions for easier maintainability,
 abstract class GutterMarkerProvider(private val valetFileClass: KClass<out ValetFile>) :
     RelatedItemLineMarkerProvider() {
     protected open val log: Logger by logger()
@@ -56,43 +54,66 @@ abstract class GutterMarkerProvider(private val valetFileClass: KClass<out Valet
             log.debug { "${valetFileClass.simpleName} Accepts ${computePsiElementString(element)}" }
 
             if (valetFile.isTest()) {
-                log.trace { "${computePsiElementString(element)} is a test" }
-
-                val sources = valetFile.getSources()
-                log.trace { "Sources: ${sources.joinToString(", ", transform = ::computePsiElementString)}" }
-
-                if (sources.isEmpty()) {
-                    val markerBuilder = SOURCE_CLASS_MISSING.forTarget(element)
-                    result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
-                } else {
-                    val markerBuilder = SOURCE_CLASS_FOUND.forTargets(sources)
-                    result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
-                }
+                handleTestElement(element, valetFile, result)
             } else if (valetFile.isSource()) {
-                log.trace { "${computePsiElementString(element)} is a source" }
-
-                val (withCases, noCases) = valetFile.getTests()
-                log.trace { "Tests (case)   :  ${withCases.joinToString(", ", transform = ::computePsiElementString)}" }
-                log.trace { "Tests (no case):  ${noCases.joinToString(", ", transform = ::computePsiElementString)}" }
-
-                if (withCases.isEmpty() && noCases.isEmpty()) {
-                    val markerBuilder = TEST_CLASS_MISSING.forTarget(element)
-                    result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
-                } else {
-                    // Theoretically there could be two markers one each for tests with and without cases. I don't
-                    // think this will ever happen though. But just like I think there won't often be two source
-                    // files for single test, the option is there should it ever happen.
-                    if (withCases.isNotEmpty()) {
-                        val markerBuilder = TEST_CLASS_FOUND.forTargets(withCases)
-                        result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
-                    }
-
-                    if (noCases.isNotEmpty()) {
-                        val markerBuilder = TEST_CLASS_WITHOUT_CASES.forTargets(noCases)
-                        result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
-                    }
-                }
+                handleSourceElement(element, valetFile, result)
             }
         }
+    }
+
+    private fun handleTestElement(element: PsiElement, valetFile: ValetFile, result: ResultList) {
+        log.trace { "${computePsiElementString(element)} is a test" }
+
+        val sources = valetFile.getSources()
+        log.trace { "Sources: ${sources.joinToString(", ", transform = ::computePsiElementString)}" }
+
+        if (sources.isEmpty()) {
+            buildMarkerInfo(SOURCE_CLASS_MISSING, result, valetFile, element)
+        } else {
+            buildMarkerInfo(SOURCE_CLASS_MISSING, result, valetFile, sources)
+        }
+    }
+
+    private fun handleSourceElement(element: PsiElement, valetFile: ValetFile, result: ResultList) {
+        log.trace { "${computePsiElementString(element)} is a source" }
+
+        val (withCases, noCases) = valetFile.getTests()
+        log.trace { "Tests (case)   :  ${withCases.joinToString(", ", transform = ::computePsiElementString)}" }
+        log.trace { "Tests (no case):  ${noCases.joinToString(", ", transform = ::computePsiElementString)}" }
+
+        if (withCases.isEmpty() && noCases.isEmpty()) {
+            buildMarkerInfo(TEST_CLASS_MISSING, result, valetFile, element)
+        } else {
+            // Theoretically there could be two markers one each for tests with and without cases. I don't
+            // think this will ever happen though. But just like I think there won't often be two source
+            // files for single test, the option is there should it ever happen.
+            if (withCases.isNotEmpty()) {
+                buildMarkerInfo(TEST_CLASS_FOUND, result, valetFile, withCases)
+            }
+
+            if (noCases.isNotEmpty()) {
+                buildMarkerInfo(TEST_CLASS_WITHOUT_CASES, result, valetFile, element)
+            }
+        }
+    }
+
+    private fun buildMarkerInfo(
+        iconBuilder: NavigationIconBuilder,
+        result: ResultList,
+        valetFile: ValetFile,
+        target: PsiElement,
+    ) {
+        val markerBuilder = iconBuilder.forTarget(target)
+        result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
+    }
+
+    private fun buildMarkerInfo(
+        iconBuilder: NavigationIconBuilder,
+        result: ResultList,
+        valetFile: ValetFile,
+        targets: List<PsiElement>,
+    ) {
+        val markerBuilder = iconBuilder.forTargets(targets)
+        result.add(markerBuilder.createLineMarkerInfo(valetFile.markerTarget()))
     }
 }
