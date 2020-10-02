@@ -20,6 +20,7 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiElement
+import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_MISSING
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_MISSING
@@ -70,7 +71,7 @@ abstract class GutterMarkerProvider(private val valetFileClass: KClass<out Valet
         if (sources.isEmpty()) {
             buildMarkerInfo(SOURCE_CLASS_MISSING, result, valetFile, element)
         } else {
-            buildMarkerInfo(SOURCE_CLASS_MISSING, result, valetFile, sources)
+            buildMarkerInfo(SOURCE_CLASS_FOUND, result, valetFile, sources)
         }
     }
 
