@@ -1,0 +1,36 @@
+<idea-plugin>
+    <id>lafreakshow.test-valet</id>
+    <name>Test Valet</name>
+    <vendor>Lafreakshow Projects</vendor>
+    <version>0.1.0</version>
+
+    <description><![CDATA[
+    improves ease of navigation between Test Files and Source File.
+
+    This is a sort of continuation/extension/rework of the Test Navigator Plugin
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <depends>com.intellij.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="lafreakshow.plugins.valet.settings.ValetSettings"/>
+        <applicationConfigurable
+                instance="lafreakshow.plugins.valet.settings.ValetSettingsConfigurable"
+                id="lafreakshow.plugins.valet.settings.ValetSettingsConfigurable"
+                displayName="Test Valet"
+        />
+
+        <codeInsight.lineMarkerProvider
+                language="JAVA"
+                implementationClass="lafreakshow.plugins.valet.languages.JavaGutterMarkerProvider"
+        />
+
+        <codeInsight.lineMarkerProvider
+                language="kotlin"
+                implementationClass="lafreakshow.plugins.valet.languages.KotlinGutterMarkerProvider"
+        />
+    </extensions>
+</idea-plugin>
