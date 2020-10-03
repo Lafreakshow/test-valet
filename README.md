@@ -51,16 +51,6 @@ I wanted something different but still similar to Test Navigator and this was th
 
 Yes. 
 
-# I dislike your style/mentality
-
-That is your right. However, Test Valet is a hobby project, and I sort of consider it my baby since it is the first
- Project I actually took somewhat seriously. I always appreciate feedback and suggestions (I want Test Valet to be
- helpful to more than just myself, but I cannot know what features other people need) But please understand that I
- will always choose my style over whatever you may prefer. I will respectfully consider any criticism but in exchange I
- expect that you respectfully accept my decision. 
- 
- Well, you can always scream at me and move on, that is fine with me too.
-
 # Contributing to Test Valet
 
 Test Valets API has been designed to make it straight forward to add support for new languages (as long as they
