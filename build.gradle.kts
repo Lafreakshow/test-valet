@@ -149,14 +149,6 @@ idea {
     module {
         isDownloadJavadoc = true
         isDownloadSources = true
-        resourceDirs = mutableSetOf(
-            file("src/main/resources"),
-            // Workaround for a bug in IntelliJ where it will include lots of empty packages from dependencies in
-            // the package view if any resource directory containing a META-INF folder was added.
-            // Addendum: Apparently the Icons directory also triggers this. At least there it's only a dozen packages
-            // instead of a couple hundred.
-            file("src/main/resources/META-INF/")
-        )
     }
 }
 
@@ -223,6 +215,10 @@ tasks.reckonTagCreate {
 
 tasks.test {
     useJUnitPlatform()
+
+    // In some cases it is desired to change the logging setting for the actual test running JVM, this is
+    // the most convenient way.
+    jvmArgs("-Djava.util.logging.config.file=src/test/resources/logging.properties")
 }
 
 // When running under Java9+, the debugger needs some permissions to be able and attach to the development instance
