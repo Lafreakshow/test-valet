@@ -241,10 +241,18 @@ formatting:
     active: true
     autoCorrect: true
     insertFinalNewLine: true
+
+    # Defines the imports layout. There are predefined layouts like "ascii" or "idea", as well as a custom layout.
+    # The predefined layouts are temporary and will be deprecated in the future, once Kotlin plugin supports EditorConfig property for imports layout.
+    # The custom layout can be composed by the following symbols:
+    # "*" - wildcard. There must be at least one entry of a single wildcard to match all other imports. Matches anything after a specified symbol/import as well.
+    # "|" - blank line. Supports only single blank lines between imports. No blank line is allowed in the beginning or end of the layout.
+    # "^" - alias import, e.g. "^android.*" will match all android alias imports, "^*" will match all other alias imports.
+    # import paths - these can be full paths, e.g. "java.util.List" as well as wildcard paths, e.g. "kotlin.*"
   ImportOrdering:
     active: true
     autoCorrect: true
-    layout: 'idea'
+    layout: '*,java.*,javax.*,kotlin.*,|,com.intellij.*,org.jetbrains.*,|,org.junit.*,strikt.*,|,lafreakshow.*,|^*'
   Indentation:
     active: true
     autoCorrect: true
