@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.utils.ProviderDelegate
 import org.jetbrains.kotlin.util.removeSuffixIfPresent
@@ -57,7 +58,7 @@ val ideaVersion: String by rootProject.extra("2020.2")
 plugins {
     // Required for buildings
     kotlin("jvm").version("1.4.10")
-    id("org.jetbrains.intellij").version("0.4.26")
+    id("org.jetbrains.intellij").version("0.5.0")
 
     // Extra stuff
     // Reckon automatically determines a project version based on git status.
@@ -152,6 +153,18 @@ idea {
     }
 }
 
+logger.lifecycle(
+    buildString {
+        val install = javaInstalls.installationForCurrentVirtualMachine.get()
+        append("Running ")
+        append(install.implementationName)
+        append(":")
+        append(install.javaVersion)
+        append(" from ")
+        append(install.installationDirectory)
+    }
+)
+
 // Configuration affecting details of the build process
 // ====================================================
 
@@ -162,8 +175,10 @@ detekt {
     // it around because 1) in case someone does add java sources and 2) because when working with Java Modules, even if
     // written in kotlin, there will often be a module-info.java in the Java source set.
     input = objects.fileCollection().from(
-        DetektExtension.DEFAULT_SRC_DIR_JAVA, "src/test/java",
-        DetektExtension.DEFAULT_SRC_DIR_KOTLIN, "src/test/kotlin"
+        DetektExtension.DEFAULT_SRC_DIR_JAVA,
+        "src/test/java",
+        DetektExtension.DEFAULT_SRC_DIR_KOTLIN,
+        "src/test/kotlin"
     )
 
     // This will make detekt start with the default rules enabled and then apply any custom configuration from config
