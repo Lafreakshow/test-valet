@@ -20,6 +20,8 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerInfo
 import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiElement
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_FOUND
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.SOURCE_CLASS_MISSING
 import lafreakshow.plugins.valet.api.NavigationIconBuilder.Companion.TEST_CLASS_FOUND
@@ -29,8 +31,6 @@ import lafreakshow.plugins.valet.util.computePsiElementString
 import lafreakshow.plugins.valet.util.debug
 import lafreakshow.plugins.valet.util.logger
 import lafreakshow.plugins.valet.util.trace
-import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
 
 internal typealias ResultList = MutableCollection<in RelatedItemLineMarkerInfo<*>>
 
@@ -93,7 +93,7 @@ abstract class GutterMarkerProvider(private val valetFileClass: KClass<out Valet
             }
 
             if (noCases.isNotEmpty()) {
-                buildMarkerInfo(TEST_CLASS_WITHOUT_CASES, result, valetFile, element)
+                buildMarkerInfo(TEST_CLASS_WITHOUT_CASES, result, valetFile, noCases)
             }
         }
     }

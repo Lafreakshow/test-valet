@@ -122,8 +122,7 @@ internal fun getModuleSearchScope(element: PsiElement): Optional<GlobalSearchSco
         val testService = module.getService(TestModuleProperties::class.java)
         // Use the service to see if there may be a production module belonging to the elements module
         // If there is no production module defined then use the scope of the elements module directly.
-        val scope = testService.productionModule?.moduleScope ?: module.moduleTestsWithDependentsScope
-
+        val scope = testService.productionModule?.moduleScope ?: module.moduleWithDependentsScope
         Optional.of(scope)
     } else {
         Optional.empty()
