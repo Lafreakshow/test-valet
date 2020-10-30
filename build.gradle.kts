@@ -7,16 +7,6 @@ import org.jetbrains.kotlin.util.removeSuffixIfPresent
 // Some Utility Definitions
 // ========================
 
-buildscript {
-    repositories {
-        // This is here to fix a missing dependency issue with intelliJ plugin introduced in 0.25 und still present
-        // in 0.26. It should hopefully be fixed in 0.27.
-        maven {
-            url = uri("https://jetbrains.bintray.com/intellij-plugin-service")
-        }
-    }
-}
-
 // these two allow to conveniently use the version reckon ... reckons without the commit hash/timestamp it appends
 // to insignificant versions. Please leave this here even if it's not currently used.
 //
