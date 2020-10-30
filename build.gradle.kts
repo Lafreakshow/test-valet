@@ -49,7 +49,7 @@ val hashlessVersion: String by ProviderDelegate { hashlessVersionProvider.get() 
 
 // Try to keep all dependency related version stuff here for easy of maintainability
 val versionJUnit: String by rootProject.extra("5.7.0")
-val versionStrikt: String by rootProject.extra("0.27.0")
+val versionStrikt: String by rootProject.extra("0.28.0")
 val kotlinLibVersion: String by rootProject.extra("1.4+")
 
 // Minimum version of Idea to build against. Also used by the intelliJ plugin to resolve plugin dependencies.
@@ -58,11 +58,11 @@ val ideaVersion: String by rootProject.extra("2020.2")
 plugins {
     // Required for buildings
     kotlin("jvm").version("1.4.10")
-    id("org.jetbrains.intellij").version("0.5.0")
+    id("org.jetbrains.intellij").version("0.6.1")
 
     // Extra stuff
     // Reckon automatically determines a project version based on git status.
-    id("org.ajoberstar.reckon").version("0.12.0")
+    id("org.ajoberstar.reckon").version("0.13.0")
 
     // detekt is used for code quality. The Detekt Idea plugin can be used as well.
     // There are some things Detekt can ... detect, that IntelliJs inspections won't.
@@ -70,7 +70,7 @@ plugins {
     // Note that I don't require everything Detekt reports to be fixed. For example, comment related rules have a weight
     // of 0 because they don't affect the resulting jar's quality. However, using the config file in this project,
     // Detekt will fail builds if too many of certain issues were found.
-    id("io.gitlab.arturbosch.detekt").version("1.12.0-RC1")
+    id("io.gitlab.arturbosch.detekt").version("1.14.2")
 
     // I use the idea plugin to have IntelliJ download sources and docs for any dependencies automatically. Not
     // required at all. I believe the IntelliJ plugin implicitly applies the idea plugin but I'm a fan of being
@@ -127,7 +127,6 @@ dependencies {
 
     testImplementation("io.strikt:strikt-core:$versionStrikt")
     testImplementation("org.junit.jupiter:junit-jupiter:$versionJUnit")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$versionJUnit")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$versionJUnit")
 }
 
@@ -226,6 +225,7 @@ reckon {
 // to be clean, a build to succeed, a non-build-failing run of detekt and tests to pass.
 tasks.reckonTagCreate {
     dependsOn(":check")
+    dependsOn(":runPluginVerifier")
 }
 
 tasks.test {
