@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.utils.ProviderDelegate
@@ -231,5 +232,17 @@ tasks.test {
 listOf("buildSearchableOptions", "runIde").forEach {
     tasks.named(it, JavaForkOptions::class).configure {
         jvmArgs("--add-exports", "java.base/jdk.internal.vm=ALL-UNNAMED")
+    }
+}
+
+// This will prevent the build from spamming unique artifacts due to the version changing by the second.
+// Will now only keep the 5 latest artifacts.
+tasks.withType<Jar>() {
+    doLast {
+        val artifactDir = this.project.buildDir.resolve("libs")
+        artifactDir.listFilesOrdered().dropLast(5).forEach {
+            logger.lifecycle("deleting stale artifact: ${it.name}")
+            it.delete()
+        }
     }
 }
