@@ -4,6 +4,7 @@ build:
   weights:
     comments: 0
     complexity: 0
+    formatting: 0.1
 
 config:
   validation: true

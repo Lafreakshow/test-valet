@@ -95,6 +95,8 @@ intellij {
     configureDefaultDependencies = true
 }
 
+
+
 val priority: Configuration by configurations.creating
 
 dependencies {
@@ -119,6 +121,8 @@ dependencies {
     testImplementation("io.strikt:strikt-core:$versionStrikt")
     testImplementation("org.junit.jupiter:junit-jupiter:$versionJUnit")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$versionJUnit")
+
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.14.2")
 }
 
 sourceSets.main.configure {
