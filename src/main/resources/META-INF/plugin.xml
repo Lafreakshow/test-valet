@@ -1,14 +1,9 @@
-<idea-plugin>
+<idea-plugin allow-bundled-update="true">
     <id>lafreakshow.test-valet</id>
     <name>Test Valet</name>
     <vendor>Lafreakshow Projects</vendor>
     <version>0.1.0</version>
-
-    <description><![CDATA[
-    improves ease of navigation between Test Files and Source File.
-
-    This is a sort of continuation/extension/rework of the Test Navigator Plugin
-    ]]></description>
+    <idea-version since-build="202.6397" until-build="202.*"/>
 
     <depends>com.intellij.modules.platform</depends>
 
