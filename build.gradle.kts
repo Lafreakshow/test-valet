@@ -80,15 +80,6 @@ repositories {
 
 project.group = "lafreakshow.plugins"
 
-tasks.runIde {
-    // It took me a while to figure out to use this reliably. The problem was that a simple build isn't enough. Run
-    // the prepareSandbox task, which will build the jar and replace the plugin in the sandbox, at which point
-    // IntelliJ can pick up on the change and reload. Note that some changes lead to failed unloads at which point
-    // you need to restart the development instance. I've had such problems mostly with changing the Icons and
-    // occasionally with minor changes within a function.
-    autoReloadPlugins = true
-}
-
 intellij {
     // the lowest version that has to be supported is 2020.2 (because it's the one I use as of writing this)
     // but support for earlier versions may be added if there is demand.
@@ -184,20 +175,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf(
-            // some IntelliJ platform interfaces use default methods, to be able to use these in Kotlin we must
-            // enable it explicitly.
-            "-Xjvm-default=enable"
-        )
-
-        languageVersion = "1.4"
-        apiVersion = "1.4"
-    }
-}
-
 // reckon needs to have some info passed via properties to create tags.
 reckon {
     scopeFromProp()
@@ -212,51 +189,6 @@ reckon {
     stageFromProp("dev", "rc", "final")
 }
 
-// Make sure the project is in reasonable shape before allowing a tag to be created. All in all this requires the repo
-// to be clean, a build to succeed, a non-build-failing run of detekt and tests to pass.
-tasks.reckonTagCreate {
-    dependsOn(":check")
-    dependsOn(":runPluginVerifier")
-}
-
-tasks.patchPluginXml {
-    setChangeNotes(
-        closure {
-            val builder = StringBuilder()
-            val allVersions = changelog.getAll()
-
-            allVersions.entries
-                .filter {
-                    project.version.toString().contains(Regex("[dev|rc]")) || it.key != changelog.unreleasedTerm
-                }
-                .sortedByDescending { it.value.version }
-                .forEach { (key, value) ->
-                    builder.append(value.withHeader(true).toHTML())
-                }
-
-            builder.toString()
-        }
-    )
-    setPluginDescription(
-        closure {
-            val descriptionStart = "<!PLUGIN DESCRIPTION START>"
-            val descriptionEnd = "<!PLUGIN DESCRIPTION END>"
-
-            val descriptionMD = file("README.md")
-                .readLines(Charsets.UTF_8)
-                .run {
-                    if (this.containsAll(listOf(descriptionStart, descriptionEnd))) {
-                        this.subList(indexOf(descriptionStart) + 1, indexOf(descriptionEnd))
-                    } else {
-                        logger.warn("No Description found in README.md")
-                        listOf("NO DESCRIPTION")
-                    }
-                }.joinToString("\n")
-            markdownToHTML(descriptionMD)
-        }
-    )
-}
-
 changelog {
     version = hashlessVersion
     path = "${project.projectDir}/CHANGELOG.md"
@@ -268,30 +200,100 @@ changelog {
     groups = listOf("Added", "Changed", "Fixed")
 }
 
-tasks.test {
-    useJUnitPlatform()
-
-    // In some cases it is desired to change the logging setting for the actual test running JVM, this is
-    // the most convenient way.
-    jvmArgs("-Djava.util.logging.config.file=src/test/resources/logging.properties")
-}
-
-// When running under Java9+, the debugger needs some permissions to be able and attach to the development instance
-// technically only needed when actually debugging but I added it to any task that I noticed output a warning for this.
-listOf("buildSearchableOptions", "runIde").forEach {
-    tasks.named(it, JavaForkOptions::class).configure {
-        jvmArgs("--add-exports", "java.base/jdk.internal.vm=ALL-UNNAMED")
+tasks {
+    runIde {
+        // It took me a while to figure out to use this reliably. The problem was that a simple build isn't enough. Run
+        // the prepareSandbox task, which will build the jar and replace the plugin in the sandbox, at which point
+        // IntelliJ can pick up on the change and reload. Note that some changes lead to failed unloads at which point
+        // you need to restart the development instance. I've had such problems mostly with changing the Icons and
+        // occasionally with minor changes within a function.
+        autoReloadPlugins = true
     }
-}
 
-// This will prevent the build from spamming unique artifacts due to the version changing by the second.
-// Will now only keep the 5 latest artifacts.
-tasks.withType<AbstractArchiveTask>() {
-    doLast {
-        val artifactDir = (this as AbstractArchiveTask).destinationDirectory.asFile.get()
-        artifactDir.listFilesOrdered().dropLast(5).forEach {
-            logger.lifecycle("deleting stale artifact: ${it.name}")
-            it.delete()
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf(
+                // some IntelliJ platform interfaces use default methods, to be able to use these in Kotlin we must
+                // enable it explicitly.
+                "-Xjvm-default=enable"
+            )
+
+            languageVersion = "1.4"
+            apiVersion = "1.4"
+        }
+    }
+
+    // Make sure the project is in reasonable shape before allowing a tag to be created. All in all this requires the
+    // repo to be clean, a build to succeed, a non-build-failing run of detekt and tests to pass.
+    reckonTagCreate {
+        dependsOn(":check")
+        dependsOn(":runPluginVerifier")
+    }
+
+    patchPluginXml {
+        setChangeNotes(
+            closure {
+                val builder = StringBuilder()
+                val allVersions = changelog.getAll()
+
+                allVersions.entries
+                    .filter {
+                        project.version.toString().contains(Regex("[dev|rc]")) || it.key != changelog.unreleasedTerm
+                    }
+                    .sortedByDescending { it.value.version }
+                    .forEach { (key, value) ->
+                        builder.append(value.withHeader(true).toHTML())
+                    }
+
+                builder.toString()
+            }
+        )
+        setPluginDescription(
+            closure {
+                val descriptionStart = "<!PLUGIN DESCRIPTION START>"
+                val descriptionEnd = "<!PLUGIN DESCRIPTION END>"
+
+                val descriptionMD = file("README.md")
+                    .readLines(Charsets.UTF_8)
+                    .run {
+                        if (this.containsAll(listOf(descriptionStart, descriptionEnd))) {
+                            this.subList(indexOf(descriptionStart) + 1, indexOf(descriptionEnd))
+                        } else {
+                            logger.warn("No Description found in README.md")
+                            listOf("NO DESCRIPTION")
+                        }
+                    }.joinToString("\n")
+                markdownToHTML(descriptionMD)
+            }
+        )
+    }
+
+    test {
+        useJUnitPlatform()
+
+        // In some cases it is desired to change the logging setting for the actual test running JVM, this is
+        // the most convenient way.
+        jvmArgs("-Djava.util.logging.config.file=src/test/resources/logging.properties")
+    }
+
+    // This will prevent the build from spamming unique artifacts due to the version changing by the second.
+    // Will now only keep the 5 latest artifacts.
+    withType<AbstractArchiveTask>() {
+        doLast {
+            val artifactDir = (this as AbstractArchiveTask).destinationDirectory.asFile.get()
+            artifactDir.listFilesOrdered().dropLast(5).forEach {
+                logger.lifecycle("deleting stale artifact: ${it.name}")
+                it.delete()
+            }
+        }
+    }
+
+    // When running under Java9+, the debugger needs some permissions to be able and attach to the development instance
+    // technically only needed when actually debugging but I added it to any task that I noticed output a warning
+    listOf("buildSearchableOptions", "runIde").forEach {
+        named(it, JavaForkOptions::class).configure {
+            jvmArgs("--add-exports", "java.base/jdk.internal.vm=ALL-UNNAMED")
         }
     }
 }
