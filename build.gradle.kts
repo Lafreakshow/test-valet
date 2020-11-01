@@ -1,6 +1,9 @@
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.kotlin.dsl.support.listFilesOrdered
 
+import org.jetbrains.changelog.closure
+import org.jetbrains.changelog.date
+import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.utils.ProviderDelegate
 import org.jetbrains.kotlin.util.removeSuffixIfPresent
@@ -33,7 +36,7 @@ import org.jetbrains.kotlin.util.removeSuffixIfPresent
 // expected to be dev versions.
 val hashlessVersionProvider: Provider<String> = provider {
     project.version.toString()
-        .replaceAfterLast("dev", "")
+        .replaceAfterLast("+", "")
         .removeSuffixIfPresent("+")
 }
 val hashlessVersion: String by ProviderDelegate { hashlessVersionProvider.get() }
@@ -50,6 +53,7 @@ plugins {
     // Required for buildings
     kotlin("jvm").version("1.4.10")
     id("org.jetbrains.intellij").version("0.6.1")
+    id("org.jetbrains.changelog") version "0.6.2"
 
     // Extra stuff
     // Reckon automatically determines a project version based on git status.
@@ -95,8 +99,6 @@ intellij {
     configureDefaultDependencies = true
 }
 
-
-
 val priority: Configuration by configurations.creating
 
 dependencies {
@@ -132,12 +134,6 @@ sourceSets.main.configure {
 sourceSets.test.configure {
     compileClasspath = priority + compileClasspath
     runtimeClasspath = priority + runtimeClasspath
-}
-
-tasks.jar {
-    // Reckon appends a commit hash or timestamp to every version between two releases. If this would end up in the jars
-    // filename IntelliJ would not be able to detect changes for the purpose of hot reloading the plugin.
-    archiveVersion.set(hashlessVersionProvider)
 }
 
 idea {
@@ -221,6 +217,55 @@ reckon {
 tasks.reckonTagCreate {
     dependsOn(":check")
     dependsOn(":runPluginVerifier")
+}
+
+tasks.patchPluginXml {
+    setChangeNotes(
+        closure {
+            val builder = StringBuilder()
+            val allVersions = changelog.getAll()
+
+            allVersions.entries
+                .filter {
+                    project.version.toString().contains(Regex("[dev|rc]")) || it.key != changelog.unreleasedTerm
+                }
+                .sortedByDescending { it.value.version }
+                .forEach { (key, value) ->
+                    builder.append(value.withHeader(true).toHTML())
+                }
+
+            builder.toString()
+        }
+    )
+    setPluginDescription(
+        closure {
+            val descriptionStart = "<!PLUGIN DESCRIPTION START>"
+            val descriptionEnd = "<!PLUGIN DESCRIPTION END>"
+
+            val descriptionMD = file("README.md")
+                .readLines(Charsets.UTF_8)
+                .run {
+                    if (this.containsAll(listOf(descriptionStart, descriptionEnd))) {
+                        this.subList(indexOf(descriptionStart) + 1, indexOf(descriptionEnd))
+                    } else {
+                        logger.warn("No Description found in README.md")
+                        listOf("NO DESCRIPTION")
+                    }
+                }.joinToString("\n")
+            markdownToHTML(descriptionMD)
+        }
+    )
+}
+
+changelog {
+    version = hashlessVersion
+    path = "${project.projectDir}/CHANGELOG.md"
+    header = closure { "$hashlessVersion - ${date("yyyy-mm-dd")}" }
+    itemPrefix = "-"
+    keepUnreleasedSection = true
+    patchEmpty = true
+    unreleasedTerm = "[Unreleased]"
+    groups = listOf("Added", "Changed", "Fixed")
 }
 
 tasks.test {

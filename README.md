@@ -1,14 +1,38 @@
 # Test Valet
 
-This is a continuation/extension/rework of the [Test Navigator IntelliJ Plugin](https://github.com/stacherzakp/test-navigator-plugin)
+<!PLUGIN DESCRIPTION START>
+Improves ease of navigation between test and source files.
 
-I originally just wanted to make some quick changes, but it became apparent very quickly that it would turn into a
- major effort. So major, the version you see now probably has nothing in common with the original plugin anymore
- except for some features. However, I started out with the original code, so I found it appropriate to credit
- the original author.
+This is a continuation/extension/rework of the [Test Navigator IntelliJ Plugin](https://github.com/stacherzakp/test-navigator-plugin).
+Even though it shares no code, the author still deserves credit for all the inspiration and help I got from the original source.
 
-As of writing this line, Test Valet doesn't share any files with Test Navigator, but I still consider it to be based
- off of it.
+# Features
+
+- gutter Markers for sources:
+    - green [T]: a test was found
+    - yellow [T]: a test was found but doesn't contain test cases
+    - red [T]: no test was found
+- gutter Markers for tests:
+    - green [S]: a source was found
+    - red [S]: no source was found
+- locates test/source based on fully qualified name with configurable suffixes
+- handles test in the same module and tests in separate module (e.g. imported gradle source sets)
+- supports Java classes and interfaces
+- supports Kotlin (data, sealed, enum) classes, objects and interfaces
+<!PLUGIN DESCRIPTION END>
+
+ # Upcoming features
+ 
+ ## Timeline: soon-ish
+ - support for kotlin top-level functions and properties
+ - option to use the original Test Navigator Icons
+ 
+ ## Timeline: eventually
+ - support for more test frameworks and languages as demand arises
+ - smarter detection of location of test/source files
+ - link multiple tests/sources per target
+ - detection of magic `!Tests [symbol]` comments to link tests and sources without requiring a suffix
+
  
  # Availability
  
@@ -16,16 +40,6 @@ As of writing this line, Test Valet doesn't share any files with Test Navigator,
   experimental and not ready for a formal release. If you want to try it out anyway, you will have to build the
   plugin yourself, which in theory should be as simple as cloning the repo and running `./gradlew buildPlugin
   ` (`.\gradlew.bat buildPlugin` on windows).
-
-# Features
-
-- provides gutter marker with navigation to test/source for Java Classes, Kotlin Classes and Kotlin objects.
-- finds test/source based on test file suffixes, configurable in settings.
-- automagically finds test/source file in separate modules (confirmed to work only for modules imported from default
- "main"/"test" gradle source sets. Should theoretically work with any setup as long as IntelliJ picks up which
-  modules relate to each other, still very experimental)
-
-- (TODO) gutter icons for kotlin top-level functions.
 
 ## Comparison to Test Navigator
 
