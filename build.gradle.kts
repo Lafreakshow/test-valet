@@ -286,9 +286,9 @@ listOf("buildSearchableOptions", "runIde").forEach {
 
 // This will prevent the build from spamming unique artifacts due to the version changing by the second.
 // Will now only keep the 5 latest artifacts.
-tasks.withType<Jar>() {
+tasks.withType<AbstractArchiveTask>() {
     doLast {
-        val artifactDir = this.project.buildDir.resolve("libs")
+        val artifactDir = (this as AbstractArchiveTask).destinationDirectory.asFile.get()
         artifactDir.listFilesOrdered().dropLast(5).forEach {
             logger.lifecycle("deleting stale artifact: ${it.name}")
             it.delete()
